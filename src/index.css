@@ -688,6 +688,132 @@ button:active {
   background-color: var(--error-light);
 }
 
+.game-center-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.game-undo-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  color: var(--text-dim);
+  background: transparent;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: var(--transition);
+}
+
+.game-undo-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+.game-undo-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Finish Confirmation Modal */
+.finish-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(28, 28, 30, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.finish-modal-content {
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  text-align: center;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.finish-modal-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.finish-modal-message {
+  font-size: 15px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.finish-modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.finish-modal-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.finish-modal-btn.save {
+  background-color: var(--primary);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(224, 83, 0, 0.2);
+}
+
+.finish-modal-btn.save:hover {
+  background-color: var(--primary-hover);
+  box-shadow: 0 6px 18px rgba(224, 83, 0, 0.3);
+}
+
+.finish-modal-btn.skip {
+  background-color: var(--secondary);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.finish-modal-btn.skip:hover {
+  background-color: var(--border);
+}
+
+.finish-modal-btn.cancel {
+  background: transparent;
+  color: var(--text-dim);
+}
+
+.finish-modal-btn.cancel:hover {
+  color: var(--text);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
 /* 4-column game screen layout: Sidebars on the edges, active players in center */
 .game-split-layout {
   flex: 1;

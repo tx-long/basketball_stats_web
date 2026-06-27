@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { BASKETBALL_ACTIONS } from '../config/actions';
 import type { GameAction, ActionOption } from '../config/actions';
-import { ChevronRight, ArrowLeft, RefreshCw, HandHelping, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ArrowLeft, RefreshCw, HandHelping, ChevronLeft, Undo2, FileDown } from 'lucide-react';
+import { exportToPDF, exportToText, generateCustomFilename } from '../services/exportService';
 
 export const GameScreen = ({ navigation }: any) => {
   const { 
@@ -15,7 +16,11 @@ export const GameScreen = ({ navigation }: any) => {
     getPlayerStats, 
     setActiveLineup,
     language,
-    t
+    t,
+    undoLastEvent,
+    events,
+    startersA,
+    startersB
   } = useGame();
   
   const getActionLabel = (opt: any) => {
@@ -35,6 +40,31 @@ export const GameScreen = ({ navigation }: any) => {
 
   // Substitution Flow states
   const [isSubFlow, setIsSubFlow] = useState(false);
+
+  // Finish confirmation states
+  const [showFinishModal, setShowFinishModal] = useState(false);
+
+  const handleSaveAndFinish = () => {
+    const statsA = teamA.players.map(p => getPlayerStats(p.id)!);
+    const statsB = teamB.players.map(p => getPlayerStats(p.id)!);
+    
+    const customFilename = generateCustomFilename(teamA, teamB);
+    
+    // Export both with identical name
+    exportToPDF(teamA, teamB, statsA, statsB, startersA, startersB, language, customFilename);
+    exportToText(events, teamA, teamB, language, customFilename);
+    
+    // Proceed to summary
+    finishGame();
+    setShowFinishModal(false);
+    navigation.navigate('Summary');
+  };
+
+  const handleSkipAndFinish = () => {
+    finishGame();
+    setShowFinishModal(false);
+    navigation.navigate('Summary');
+  };
 
   const handlePlayerPress = (playerId: string, teamId: string) => {
     const team = teamId === 'teamA' ? teamA : teamB;
@@ -404,12 +434,20 @@ export const GameScreen = ({ navigation }: any) => {
           <span className="game-score-name" title={teamA.name}>{teamA.name}</span>
           <span className="game-score-value">{teamA.score}</span>
         </div>
-        <button className="game-finish-btn" onClick={() => {
-          finishGame();
-          navigation.navigate('Summary');
-        }}>
-          {t('game_finish_btn')}
-        </button>
+         <div className="game-center-controls">
+          <button className="game-finish-btn" onClick={() => setShowFinishModal(true)}>
+            {t('game_finish_btn')}
+          </button>
+          <button 
+            className="game-undo-btn" 
+            onClick={undoLastEvent} 
+            disabled={events.length === 0}
+            title={language === 'VN' ? 'Hoàn tác thao tác vừa nhập' : 'Undo last action'}
+          >
+            <Undo2 size={14} />
+            <span>{t('game_undo_btn')}</span>
+          </button>
+        </div>
         <div className="game-team-score team-b">
           <span className="game-score-name" title={teamB.name}>{teamB.name}</span>
           <span className="game-score-value">{teamB.score}</span>
@@ -433,6 +471,27 @@ export const GameScreen = ({ navigation }: any) => {
         {/* Rightmost column: Team B Action Sidebar */}
         {renderSidebar('teamB')}
       </div>
+
+      {showFinishModal && (
+        <div className="finish-modal-overlay">
+          <div className="finish-modal-content">
+            <h3 className="finish-modal-title">{t('finish_modal_title')}</h3>
+            <p className="finish-modal-message">{t('finish_modal_message')}</p>
+            <div className="finish-modal-buttons">
+              <button className="finish-modal-btn save" onClick={handleSaveAndFinish}>
+                <FileDown size={16} />
+                <span>{t('finish_modal_save')}</span>
+              </button>
+              <button className="finish-modal-btn skip" onClick={handleSkipAndFinish}>
+                <span>{t('finish_modal_skip')}</span>
+              </button>
+              <button className="finish-modal-btn cancel" onClick={() => setShowFinishModal(false)}>
+                <span>{t('finish_modal_cancel')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

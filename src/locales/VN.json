@@ -20,6 +20,11 @@
   "lineup_validation_error": "Mỗi đội phải chọn chính xác 5 cầu thủ ra sân!",
   
   "game_finish_btn": "KẾT THÚC",
+  "finish_modal_title": "Hoàn tất trận đấu",
+  "finish_modal_message": "Bạn có muốn tải xuống Bản thống kê PDF và Nhật ký trận đấu (Log) về thiết bị của mình không?",
+  "finish_modal_save": "Lưu & Tải về máy",
+  "finish_modal_skip": "Bỏ qua & Xem tóm tắt",
+  "finish_modal_cancel": "Quay lại trận đấu",
   "game_modal_assist_title": "Kiến tạo bởi",
   "game_modal_assist_subtitle": "Chọn cầu thủ ghi điểm & số điểm ghi được",
   "game_modal_assist_player": "Cầu thủ ghi điểm:",
@@ -73,5 +78,6 @@
   
   "log_success_title": "Xuất game log thành công!",
   "log_success_msg": "File log game đã được lưu thành công.",
-  "log_error": "Không thể xuất file game log."
+  "log_error": "Không thể xuất file game log.",
+  "game_undo_btn": "Hoàn tác"
 }

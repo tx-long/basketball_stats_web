@@ -20,6 +20,11 @@
   "lineup_validation_error": "Each team must select exactly 5 starting players!",
   
   "game_finish_btn": "FINISH",
+  "finish_modal_title": "Finish Match",
+  "finish_modal_message": "Would you like to download the Box Score PDF and Game Log to your device?",
+  "finish_modal_save": "Save & Download",
+  "finish_modal_skip": "Skip & View Summary",
+  "finish_modal_cancel": "Resume Match",
   "game_modal_assist_title": "Assist by",
   "game_modal_assist_subtitle": "Select scorer & points scored",
   "game_modal_assist_player": "Assisted Scorer:",
@@ -73,5 +78,6 @@
   
   "log_success_title": "Game Log Exported!",
   "log_success_msg": "The game log file has been successfully written.",
-  "log_error": "Unable to export game log file."
+  "log_error": "Unable to export game log file.",
+  "game_undo_btn": "Undo"
 }

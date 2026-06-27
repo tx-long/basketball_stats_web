@@ -1,3 +1,5 @@
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 import type { Team, GameEvent, PlayerStats } from '../types';
 
 const generateTeamTableHTML = (team: Team, stats: PlayerStats[], starters: string[] = [], language: 'VN' | 'EN' = 'VN') => {
@@ -197,18 +199,7 @@ const generateTeamTableHTML = (team: Team, stats: PlayerStats[], starters: strin
   `;
 };
 
-export const exportToPDF = (
-  teamA: Team,
-  teamB: Team,
-  statsA: PlayerStats[],
-  statsB: PlayerStats[],
-  startersA: string[] = [],
-  startersB: string[] = [],
-  language: 'VN' | 'EN' = 'VN'
-) => {
-  const pdfTitle = language === 'VN' ? 'Bản Thống Kê Chỉ Số Trận Đấu' : 'Match Box Score Summary';
-  
-  // Helper to sanitize team names for file system compatibility
+export const generateCustomFilename = (teamA: Team, teamB: Team, now: Date = new Date()) => {
   const sanitizeFilename = (str: string) => {
     return str
       .toLowerCase()
@@ -223,8 +214,6 @@ export const exportToPDF = (
   const sanitizedTeamA = sanitizeFilename(teamA.name);
   const sanitizedTeamB = sanitizeFilename(teamB.name);
 
-  // Format current local time: YYYYMMDD_HHmmss
-  const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
@@ -232,120 +221,116 @@ export const exportToPDF = (
   const minute = String(now.getMinutes()).padStart(2, '0');
   const second = String(now.getSeconds()).padStart(2, '0');
   const timeString = `${year}${month}${day}_${hour}${minute}${second}`;
-  const customName = `${sanitizedTeamA}_${sanitizedTeamB}_${timeString}`;
-
-  const html = `
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <title>${customName}</title>
-        <style>
-          @media print {
-            @page {
-              size: A4 landscape;
-              margin: 10mm;
-            }
-            body {
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-          }
-          body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: #000000;
-            margin: 0;
-            padding: 15px;
-            font-size: 10px;
-            background-color: #FFFFFF;
-          }
-          .title-box {
-            text-align: center;
-            font-size: 20px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
-            border-bottom: 3px double #000000;
-            padding-bottom: 5px;
-          }
-          .team-section {
-            margin-bottom: 25px;
-            page-break-inside: avoid;
-          }
-          .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 6px;
-          }
-          .team-title {
-            font-size: 15px;
-            font-weight: 900;
-            text-transform: uppercase;
-          }
-          .coaches-info {
-            font-size: 9px;
-            font-weight: bold;
-          }
-          .stats-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 5px;
-          }
-          .stats-table th, .stats-table td {
-            border: 1px solid #000000;
-            padding: 5px 3px;
-            text-align: center;
-            vertical-align: middle;
-            font-size: 9px;
-          }
-          .stats-table th {
-            background-color: #EAEAEA !important;
-            font-weight: bold;
-            text-transform: uppercase;
-          }
-          .stats-table td.player-name {
-            text-align: left;
-            padding-left: 6px;
-            font-weight: bold;
-            text-transform: uppercase;
-          }
-          .stats-table tr.team-row td {
-            font-weight: bold;
-            background-color: #F8F9FA !important;
-          }
-          .stats-table tr.total-row td {
-            font-weight: bold;
-            background-color: #ECECEC !important;
-            border-top: 2px double #000000;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="title-box">${pdfTitle}</div>
-        ${generateTeamTableHTML(teamA, statsA, startersA, language)}
-        ${generateTeamTableHTML(teamB, statsB, startersB, language)}
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-            }, 300);
-          };
-        </script>
-      </body>
-    </html>
-  `;
-
-  const printWindow = window.open('', '_blank');
-  if (printWindow) {
-    printWindow.document.write(html);
-    printWindow.document.close();
-  } else {
-    alert(language === 'VN' ? 'Không thể mở cửa sổ in. Vui lòng tắt chặn pop-up!' : 'Could not open print window. Please disable pop-up blocker!');
-  }
+  return `${sanitizedTeamA}_${sanitizedTeamB}_${timeString}`;
 };
 
-export const exportToText = (events: GameEvent[], teamA: Team, teamB: Team, language: 'VN' | 'EN' = 'VN') => {
+export const exportToPDF = (
+  teamA: Team,
+  teamB: Team,
+  statsA: PlayerStats[],
+  statsB: PlayerStats[],
+  startersA: string[] = [],
+  startersB: string[] = [],
+  language: 'VN' | 'EN' = 'VN',
+  customFilename?: string
+) => {
+  const pdfTitle = language === 'VN' ? 'Bản Thống Kê Chỉ Số Trận Đấu' : 'Match Box Score Summary';
+  const customName = customFilename || generateCustomFilename(teamA, teamB);
+
+  const styleString = `
+    .title-box {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+      border-bottom: 3px double #000000;
+      padding-bottom: 5px;
+    }
+    .team-section {
+      margin-bottom: 25px;
+      page-break-inside: avoid;
+    }
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 6px;
+    }
+    .team-title {
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .coaches-info {
+      font-size: 8px;
+      font-weight: bold;
+    }
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 5px;
+    }
+    .stats-table th, .stats-table td {
+      border: 1px solid #000000;
+      padding: 4px 2px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 8px;
+    }
+    .stats-table th {
+      background-color: #EAEAEA !important;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .stats-table td.player-name {
+      text-align: left;
+      padding-left: 4px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .stats-table tr.team-row td {
+      font-weight: bold;
+      background-color: #F8F9FA !important;
+    }
+    .stats-table tr.total-row td {
+      font-weight: bold;
+      background-color: #ECECEC !important;
+      border-top: 2px double #000000;
+    }
+  `;
+
+  const container = document.createElement('div');
+  container.innerHTML = `
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000000; padding: 15px; font-size: 9px; background-color: #FFFFFF;">
+      <style>${styleString}</style>
+      <div class="title-box">${pdfTitle}</div>
+      ${generateTeamTableHTML(teamA, statsA, startersA, language)}
+      ${generateTeamTableHTML(teamB, statsB, startersB, language)}
+    </div>
+  `;
+
+  const options = {
+    margin: [10, 10, 10, 10],
+    filename: `${customName}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2.5, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+  };
+
+  // @ts-ignore
+  html2pdf().set(options).from(container).save();
+};
+
+export const exportToText = (
+  events: GameEvent[],
+  teamA: Team,
+  teamB: Team,
+  language: 'VN' | 'EN' = 'VN',
+  customFilename?: string
+) => {
+  const customName = customFilename || generateCustomFilename(teamA, teamB);
   let log = language === 'VN' 
     ? `NHẬT KÝ TRẬN ĐẤU: ${teamA.name} vs ${teamB.name}\n`
     : `GAME LOG: ${teamA.name} vs ${teamB.name}\n`;
@@ -370,7 +355,7 @@ export const exportToText = (events: GameEvent[], teamA: Team, teamB: Team, lang
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `game_log_${Date.now()}.txt`;
+  link.download = `${customName}.txt`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

@@ -17,6 +17,7 @@ interface GameContextType extends GameState {
   language: 'VN' | 'EN';
   setLanguage: (lang: 'VN' | 'EN') => void;
   t: (key: string) => string;
+  undoLastEvent: () => void;
 }
 
 const initialState: GameState = {
@@ -137,6 +138,50 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const finishGame = useCallback(() => {
     setIsGameFinished(true);
   }, []);
+
+  const undoLastEvent = useCallback(() => {
+    if (events.length === 0) return;
+
+    const lastEvent = events[events.length - 1];
+    let eventsToRemove = 1;
+    let pointsToSubtract = lastEvent.points || 0;
+    let teamToSubtract = lastEvent.teamId;
+
+    if (events.length >= 2) {
+      const secondLastEvent = events[events.length - 2];
+      if (
+        secondLastEvent.actionId === 'assist' &&
+        (lastEvent.actionId === '2pt' || lastEvent.actionId === '3pt') &&
+        secondLastEvent.teamId === lastEvent.teamId &&
+        (lastEvent.timestamp - secondLastEvent.timestamp < 2000)
+      ) {
+        eventsToRemove = 2;
+      }
+    }
+
+    // Revert score
+    if (pointsToSubtract > 0) {
+      if (teamToSubtract === 'teamA') {
+        setTeamA(prev => ({ ...prev, score: Math.max(0, prev.score - pointsToSubtract) }));
+      } else {
+        setTeamB(prev => ({ ...prev, score: Math.max(0, prev.score - pointsToSubtract) }));
+      }
+    }
+
+    // Revert lineup if substitution was undone
+    const undoneEvents = events.slice(events.length - eventsToRemove);
+    const subEvent = undoneEvents.find(e => e.actionId === 'substitution');
+    if (subEvent) {
+      if (subEvent.teamId === 'teamA' && subEvent.onCourtA) {
+        setActivePlayersA(subEvent.onCourtA);
+      } else if (subEvent.teamId === 'teamB' && subEvent.onCourtB) {
+        setActivePlayersB(subEvent.onCourtB);
+      }
+    }
+
+    // Update events list
+    setEvents(prev => prev.slice(0, prev.length - eventsToRemove));
+  }, [events]);
 
   const resumeGame = useCallback(() => {
     setIsGameFinished(false);
@@ -310,7 +355,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       getPlayerStats,
       language,
       setLanguage,
-      t
+      t,
+      undoLastEvent
     }}>
       {children}
     </GameContext.Provider>
