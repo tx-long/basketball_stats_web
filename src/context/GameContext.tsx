@@ -73,7 +73,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
   // Save state on change
   useEffect(() => {
-    if (isGameStarted && !isGameFinished) {
+    if (isGameStarted) {
       const stateToSave = {
         teamA,
         teamB,
@@ -86,8 +86,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         isGameFinished,
       };
       localStorage.setItem('game_state', JSON.stringify(stateToSave));
-    } else if (isGameFinished) {
-      localStorage.removeItem('game_state');
     }
   }, [teamA, teamB, activePlayersA, activePlayersB, startersA, startersB, events, isGameStarted, isGameFinished]);
 
@@ -137,7 +135,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
   const finishGame = useCallback(() => {
     setIsGameFinished(true);
-    localStorage.removeItem('game_state');
   }, []);
 
   const resetGame = useCallback(() => {

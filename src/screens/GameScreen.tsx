@@ -392,6 +392,9 @@ export const GameScreen = ({ navigation }: any) => {
 
   return (
     <div className="game-container">
+      {selectedPlayer && (
+        <div className="game-sidebar-overlay" onClick={closeSelection} />
+      )}
       <div className="game-score-board">
         <button className="game-back-btn" onClick={() => navigation.goBack()}>
           <ChevronLeft size={18} />

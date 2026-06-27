@@ -1156,6 +1156,27 @@ button:active {
   flex-direction: column;
   align-items: center;
   border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.summary-back-btn {
+  position: absolute;
+  left: 32px;
+  top: 22px;
+  background-color: var(--secondary);
+  color: var(--text-dim);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.summary-back-btn:hover {
+  background-color: var(--border);
+  color: var(--text);
 }
 
 .summary-header-title {
@@ -1209,19 +1230,22 @@ button:active {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow-x: auto;
   background-color: var(--surface);
+  -webkit-overflow-scrolling: touch;
 }
 
 .summary-table {
   width: 100%;
+  min-width: 640px;
   border-collapse: collapse;
   text-align: left;
+  table-layout: fixed;
 }
 
 .summary-table th,
 .summary-table td {
-  padding: 12px 16px;
+  padding: 12px 14px;
   font-size: 14px;
 }
 
@@ -1249,6 +1273,14 @@ button:active {
 
 .summary-cell-name {
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-cell-stat {
+  width: 62px;
+  text-align: center !important;
 }
 
 .summary-cell-bold {
@@ -1307,51 +1339,190 @@ button:active {
   box-shadow: 0 4px 12px rgba(224, 83, 0, 0.2);
 }
 
+.game-sidebar-overlay {
+  display: none;
+}
+
 /* Responsive breakpoint for web screens */
 @media (max-width: 1024px) {
   body {
-    overflow-y: auto;
+    overflow: hidden;
   }
 
   .app-container {
-    height: auto;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .setup-header {
+    padding: 16px 20px;
   }
 
   .setup-scroll-view {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
     padding: 16px;
+  }
+
+  .setup-team-section {
+    padding: 16px;
+  }
+
+  .setup-footer {
+    padding: 16px 20px;
+  }
+
+  .lineup-header {
+    padding: 16px 20px;
   }
 
   .lineup-scroll-view {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
     padding: 16px;
+  }
+
+  .lineup-footer {
+    padding: 16px 20px;
   }
 
   .game-split-layout {
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    height: auto;
-    overflow-y: visible;
+    grid-template-rows: 1fr;
+    height: calc(100vh - 80px);
+    overflow: hidden;
     gap: 12px;
     padding: 12px;
   }
 
   .game-action-sidebar {
-    grid-column: span 1;
-    height: 350px;
+    display: none;
+  }
+
+  .game-action-sidebar.team-active {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    max-height: 85vh;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    z-index: 1000;
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+    border: none;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-header-row {
+    padding: 12px 16px;
+  }
+
+  .sidebar-player-target {
+    padding: 10px 16px;
+    min-height: auto;
+  }
+
+  .sidebar-buttons-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .sidebar-action-item-btn {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 10px 6px;
+    min-height: 64px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .sidebar-action-item-btn span {
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  .sidebar-action-item-btn svg {
+    display: none;
+  }
+
+  .sidebar-flow-container {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .flow-section {
+    gap: 8px;
+  }
+
+  .flow-player-grid {
+    gap: 6px;
+  }
+
+  .flow-player-btn {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .flow-points-row {
+    gap: 8px;
+  }
+
+  .flow-points-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .flow-action-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .game-sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 999;
   }
 
   .game-team-column {
     grid-column: span 1;
-    height: auto;
-    overflow-y: visible;
+    height: 100%;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .summary-header {
+    padding: 16px 20px;
+  }
+
+  .summary-back-btn {
+    left: 20px;
+    top: 12px;
+    padding: 6px 12px;
+    font-size: 12px;
   }
 
   .summary-scroll-view {
     padding: 16px;
+    gap: 20px;
+  }
+
+  .summary-footer {
+    padding: 16px 20px;
   }
 
   .global-lang-btn {
@@ -1361,18 +1532,119 @@ button:active {
 }
 
 @media (max-width: 680px) {
-  .game-split-layout {
+  .welcome-logo-img {
+    width: 70%;
+    max-width: 240px;
+  }
+
+  .welcome-logo {
+    font-size: 48px;
+  }
+
+  .welcome-subtitle {
+    font-size: 14px;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+  }
+
+  .welcome-start-btn {
+    font-size: 16px;
+    padding: 12px 32px;
+  }
+
+  .setup-coach-row {
     grid-template-columns: 1fr;
-    grid-template-rows: auto;
+    gap: 8px;
   }
 
-  .game-action-sidebar {
-    grid-column: span 1;
-    height: 320px;
+  .game-score-board {
+    padding: 8px 12px;
+    height: 64px;
   }
 
-  .game-team-column {
-    grid-column: span 1;
+  .game-score-value {
+    font-size: 24px;
+  }
+
+  .game-score-name {
+    font-size: 11px;
+    max-width: 90px;
+  }
+
+  .game-finish-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .game-back-btn {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .game-split-layout {
+    height: calc(100vh - 64px);
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .game-player-card {
+    padding: 8px 10px;
+    gap: 10px;
+    min-height: 68px;
+    border-radius: var(--radius-sm);
+  }
+
+  .game-card-number {
+    font-size: 22px;
+    width: 28px;
+  }
+
+  .game-card-name {
+    font-size: 13px;
+  }
+
+  .game-stat-badge {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+
+  .summary-header {
+    padding: 16px 12px;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .summary-back-btn {
+    position: static;
+    margin-bottom: 6px;
+    align-self: flex-start;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .summary-score-text {
+    font-size: 18px;
+  }
+
+  .summary-final-score {
+    padding: 8px 16px;
+    margin-top: 8px;
+  }
+
+  .summary-export-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .summary-export-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .summary-new-game-btn {
+    padding: 12px;
+    font-size: 14px;
   }
 }
 
