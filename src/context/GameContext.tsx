@@ -11,6 +11,7 @@ interface GameContextType extends GameState {
   setActiveLineup: (teamId: string, playerIds: string[]) => void;
   logEvent: (event: Omit<GameEvent, 'id' | 'timestamp'>) => void;
   finishGame: () => void;
+  resumeGame: () => void;
   resetGame: () => void;
   getPlayerStats: (playerId: string) => PlayerStats | undefined;
   language: 'VN' | 'EN';
@@ -135,6 +136,10 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
   const finishGame = useCallback(() => {
     setIsGameFinished(true);
+  }, []);
+
+  const resumeGame = useCallback(() => {
+    setIsGameFinished(false);
   }, []);
 
   const resetGame = useCallback(() => {
@@ -300,6 +305,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       setActiveLineup, 
       logEvent, 
       finishGame, 
+      resumeGame,
       resetGame, 
       getPlayerStats,
       language,
