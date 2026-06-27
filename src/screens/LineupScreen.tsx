@@ -3,10 +3,10 @@ import { useGame } from '../context/GameContext';
 import { Check, ChevronLeft } from 'lucide-react';
 
 export const LineupScreen = ({ navigation }: any) => {
-  const { teamA, teamB, setActiveLineup, language, t } = useGame();
+  const { teamA, teamB, startersA, startersB, setActiveLineup, language, t } = useGame();
   
-  const [selectedA, setSelectedA] = useState<string[]>([]);
-  const [selectedB, setSelectedB] = useState<string[]>([]);
+  const [selectedA, setSelectedA] = useState<string[]>(() => startersA || []);
+  const [selectedB, setSelectedB] = useState<string[]>(() => startersB || []);
 
   const togglePlayer = (team: 'A' | 'B', playerId: string) => {
     const selected = team === 'A' ? selectedA : selectedB;

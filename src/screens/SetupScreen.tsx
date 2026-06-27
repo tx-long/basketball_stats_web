@@ -3,10 +3,31 @@ import { useGame } from '../context/GameContext';
 import { Plus, Trash2, ChevronRight, ChevronLeft } from 'lucide-react';
 
 export const SetupScreen = ({ navigation }: any) => {
-  const { setupTeams, language, t } = useGame();
+  const { teamA: contextTeamA, teamB: contextTeamB, setupTeams, language, t } = useGame();
   
-  const [teamA, setTeamA] = useState({ name: 'Lakers', coach: '', assistantCoach: '', players: [{ id: 'a_1', name: '', number: '' }] });
-  const [teamB, setTeamB] = useState({ name: 'Warriors', coach: '', assistantCoach: '', players: [{ id: 'b_1', name: '', number: '' }] });
+  const [teamA, setTeamA] = useState(() => {
+    if (contextTeamA.players && contextTeamA.players.length > 0) {
+      return {
+        name: contextTeamA.name,
+        coach: contextTeamA.coach || '',
+        assistantCoach: contextTeamA.assistantCoach || '',
+        players: contextTeamA.players.map(p => ({ ...p }))
+      };
+    }
+    return { name: 'Lakers', coach: '', assistantCoach: '', players: [{ id: 'a_1', name: '', number: '' }] };
+  });
+
+  const [teamB, setTeamB] = useState(() => {
+    if (contextTeamB.players && contextTeamB.players.length > 0) {
+      return {
+        name: contextTeamB.name,
+        coach: contextTeamB.coach || '',
+        assistantCoach: contextTeamB.assistantCoach || '',
+        players: contextTeamB.players.map(p => ({ ...p }))
+      };
+    }
+    return { name: 'Warriors', coach: '', assistantCoach: '', players: [{ id: 'b_1', name: '', number: '' }] };
+  });
 
   const addPlayer = (team: 'A' | 'B') => {
     const setTeam = team === 'A' ? setTeamA : setTeamB;

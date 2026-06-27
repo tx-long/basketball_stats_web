@@ -92,16 +92,21 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   }, [teamA, teamB, activePlayersA, activePlayersB, startersA, startersB, events, isGameStarted, isGameFinished]);
 
   const setupTeams = useCallback((tA: Team, tB: Team) => {
-    setTeamA(tA);
-    setTeamB(tB);
-    setActivePlayersA([]);
-    setActivePlayersB([]);
-    setStartersA(undefined);
-    setStartersB(undefined);
-    setEvents([]);
-    setIsGameStarted(true);
-    setIsGameFinished(false);
-  }, []);
+    if (isGameStarted) {
+      setTeamA(prev => ({ ...tA, score: prev.score }));
+      setTeamB(prev => ({ ...tB, score: prev.score }));
+    } else {
+      setTeamA(tA);
+      setTeamB(tB);
+      setActivePlayersA([]);
+      setActivePlayersB([]);
+      setStartersA(undefined);
+      setStartersB(undefined);
+      setEvents([]);
+      setIsGameStarted(true);
+      setIsGameFinished(false);
+    }
+  }, [isGameStarted]);
 
   const setActiveLineup = useCallback((teamId: string, playerIds: string[]) => {
     const isTeamA = teamId === 'teamA';
