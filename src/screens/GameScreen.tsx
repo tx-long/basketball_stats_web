@@ -70,14 +70,44 @@ export const GameScreen = ({ navigation }: any) => {
     const team = teamId === 'teamA' ? teamA : teamB;
     const player = team.players.find(p => p.id === playerId);
     if (player) {
+      const stats = getPlayerStats(playerId);
+      let isDisqualified = false;
+      let hasEligibleBench = false;
+      if (stats) {
+        const specialFouls = stats.specialFoulsCount || 0;
+        const totalFouls = stats.fouls || 0;
+        isDisqualified = totalFouls >= 5 || specialFouls >= 2;
+        
+        if (isDisqualified) {
+          const activeList = teamId === 'teamA' ? activePlayersA : activePlayersB;
+          const benchPlayers = team.players.filter(bp => !activeList.includes(bp.id));
+          hasEligibleBench = benchPlayers.some(bp => {
+            const bpStats = getPlayerStats(bp.id);
+            if (!bpStats) return true;
+            const bpSpecial = bpStats.specialFoulsCount || 0;
+            const bpTotal = bpStats.fouls || 0;
+            return !(bpTotal >= 5 || bpSpecial >= 2);
+          });
+        }
+      }
+
+      if (isDisqualified && !hasEligibleBench) {
+        return; // Disabled player, ignore click
+      }
+
       if (selectedPlayer?.id === playerId) {
         // Toggle selection off
         closeSelection();
       } else {
         setSelectedPlayer({ ...player, teamId });
         setCurrentActionStep([]);
-        setIsAssistFlow(false);
-        setIsSubFlow(false);
+        if (isDisqualified && hasEligibleBench) {
+          setIsSubFlow(true);
+          setIsAssistFlow(false);
+        } else {
+          setIsAssistFlow(false);
+          setIsSubFlow(false);
+        }
         setAssistTargetPlayerId(null);
         setAssistPoints(null);
       }
@@ -92,15 +122,61 @@ export const GameScreen = ({ navigation }: any) => {
     } else if (action.id === 'substitution') {
       setIsSubFlow(true);
     } else if (action.isFinal) {
+      const pId = selectedPlayer.id;
+      const tId = selectedPlayer.teamId;
+
       logEvent({
-        teamId: selectedPlayer.teamId,
-        playerId: selectedPlayer.id,
+        teamId: tId,
+        playerId: pId,
         actionId: action.id,
         actionLabel: getActionLabel(action),
         points: (action as ActionOption).value,
         details: currentActionStep.map(s => getActionLabel(s)).join(' > ') + (currentActionStep.length > 0 ? ' > ' : '') + getActionLabel(action)
       });
-      closeSelection();
+
+      // Check if this action is a foul and if it disqualifies the player
+      let justDisqualified = false;
+      let hasEligibleBench = false;
+      const team = tId === 'teamA' ? teamA : teamB;
+
+      if (action.id.startsWith('foul_') || action.id === 'foul') {
+        const stats = getPlayerStats(pId);
+        if (stats) {
+          let specialFouls = stats.specialFoulsCount || 0;
+          let totalFouls = stats.fouls || 0;
+
+          // Add the new foul to the counts manually for immediate check
+          totalFouls += 1;
+          if (action.id === 'foul_technical' || action.id === 'foul_unsportsmanlike') {
+            specialFouls += 1;
+          }
+
+          justDisqualified = totalFouls >= 5 || specialFouls >= 2;
+
+          if (justDisqualified) {
+            const activeList = tId === 'teamA' ? activePlayersA : activePlayersB;
+            const benchPlayers = team.players.filter(bp => !activeList.includes(bp.id));
+            hasEligibleBench = benchPlayers.some(bp => {
+              const bpStats = getPlayerStats(bp.id);
+              if (!bpStats) return true;
+              const bpSpecial = bpStats.specialFoulsCount || 0;
+              const bpTotal = bpStats.fouls || 0;
+              return !(bpTotal >= 5 || bpSpecial >= 2);
+            });
+          }
+        }
+      }
+
+      if (justDisqualified && hasEligibleBench) {
+        // Keep selected and open sub flow
+        setCurrentActionStep([]);
+        setIsAssistFlow(false);
+        setIsSubFlow(true);
+        setAssistTargetPlayerId(null);
+        setAssistPoints(null);
+      } else {
+        closeSelection();
+      }
     } else if ((action as ActionOption).subOptions || (action as GameAction).options) {
       setCurrentActionStep([...currentActionStep, action]);
     }
@@ -127,6 +203,38 @@ export const GameScreen = ({ navigation }: any) => {
     const stats = getPlayerStats(playerId);
     const isSelected = selectedPlayer?.id === playerId;
     
+    // Determine foul styling
+    let foulClass = '';
+    let isCardDisabled = false;
+    if (stats) {
+      const specialFouls = stats.specialFoulsCount || 0;
+      const totalFouls = stats.fouls || 0;
+
+      const isDisqualified = totalFouls >= 5 || specialFouls >= 2;
+      const isWarning = totalFouls === 4;
+
+      if (isDisqualified) {
+        const activeList = teamId === 'teamA' ? activePlayersA : activePlayersB;
+        const benchPlayers = team.players.filter(bp => !activeList.includes(bp.id));
+        const hasEligibleBench = benchPlayers.some(bp => {
+          const bpStats = getPlayerStats(bp.id);
+          if (!bpStats) return true;
+          const bpSpecial = bpStats.specialFoulsCount || 0;
+          const bpTotal = bpStats.fouls || 0;
+          return !(bpTotal >= 5 || bpSpecial >= 2);
+        });
+
+        if (!hasEligibleBench) {
+          isCardDisabled = true;
+          foulClass = 'foul-disqualified card-disabled';
+        } else {
+          foulClass = 'foul-disqualified';
+        }
+      } else if (isWarning) {
+        foulClass = 'foul-warning';
+      }
+    }
+
     // Pick active stats that are > 0
     const statsList = [];
     if (stats) {
@@ -147,8 +255,11 @@ export const GameScreen = ({ navigation }: any) => {
     return (
       <div 
         key={playerId} 
-        className={`game-player-card ${isSelected ? 'selected' : ''}`}
-        onClick={() => handlePlayerPress(playerId, teamId)}
+        className={`game-player-card ${isSelected ? 'selected' : ''} ${foulClass}`}
+        onClick={() => {
+          if (isCardDisabled) return;
+          handlePlayerPress(playerId, teamId);
+        }}
       >
         <span className="game-card-number">{player.number}</span>
         <div className="game-card-info">
@@ -172,10 +283,10 @@ export const GameScreen = ({ navigation }: any) => {
     const team = teamId === 'teamA' ? teamA : teamB;
     const activeList = teamId === 'teamA' ? activePlayersA : activePlayersB;
     
-    const backLabel = language === 'VN' ? 'Quay lại' : 'Back';
-    const confirmLabel = language === 'VN' ? 'Xác nhận' : 'Confirm';
-    const cancelLabel = language === 'VN' ? 'Hủy' : 'Cancel';
-    const deselectLabel = language === 'VN' ? 'Bỏ chọn' : 'Deselect';
+    const backLabel = t('common_back');
+    const confirmLabel = t('common_confirm');
+    const cancelLabel = t('common_cancel');
+    const deselectLabel = t('common_deselect');
 
     // --- ASSIST FLOW RENDER ---
     if (isSelectedTeam && isAssistFlow) {
@@ -193,9 +304,9 @@ export const GameScreen = ({ navigation }: any) => {
           playerId: selectedPlayer.id,
           actionId: 'assist',
           actionLabel: t('action_assist'),
-          details: language === 'VN'
-            ? `Kiến tạo cho ${shooter.name} (#${shooter.number})`
-            : `Assist to ${shooter.name} (#${shooter.number})`
+          details: t('action_assist_details')
+            .replace('{name}', shooter.name)
+            .replace('{number}', shooter.number)
         });
         
         logEvent({
@@ -204,9 +315,9 @@ export const GameScreen = ({ navigation }: any) => {
           actionId: assistPoints === 3 ? '3pt' : '2pt',
           actionLabel: assistPoints === 3 ? t('action_3pt') : t('action_2pt'),
           points: assistPoints,
-          details: language === 'VN'
-            ? `Thành công (Kiến tạo bởi ${selectedPlayer.name} #${selectedPlayer.number})`
-            : `Made Shot (Assisted by ${selectedPlayer.name} #${selectedPlayer.number})`
+          details: t('action_shot_assisted_details')
+            .replace('{name}', selectedPlayer.name)
+            .replace('{number}', selectedPlayer.number)
         });
 
         closeSelection();
@@ -305,9 +416,9 @@ export const GameScreen = ({ navigation }: any) => {
           playerId: selectedPlayer.id,
           actionId: 'substitution',
           actionLabel: t('action_substitution'),
-          details: language === 'VN'
-            ? `Thay ra cho ${benchPlayer.name} (#${benchPlayer.number})`
-            : `Subbed out for ${benchPlayer.name} (#${benchPlayer.number})`
+          details: t('action_substitution_details')
+            .replace('{name}', benchPlayer.name)
+            .replace('{number}', benchPlayer.number)
         });
 
         closeSelection();
@@ -330,17 +441,31 @@ export const GameScreen = ({ navigation }: any) => {
               <p className="flow-empty-bench">{t('game_modal_sub_empty')}</p>
             ) : (
               <div className="flow-sub-list">
-                {benchPlayers.map(p => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    className="flow-sub-item-btn"
-                    onClick={() => handleConfirmSub(p.id)}
-                  >
-                    <span>#{p.number}</span>
-                    <span className="flow-sub-item-name">{p.name}</span>
-                  </button>
-                ))}
+                {benchPlayers.map(p => {
+                  const pStats = getPlayerStats(p.id);
+                  let isDisqualified = false;
+                  if (pStats) {
+                    const specialFouls = pStats.specialFoulsCount || 0;
+                    const totalFouls = pStats.fouls || 0;
+                    isDisqualified = totalFouls >= 5 || specialFouls >= 2;
+                  }
+
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`flow-sub-item-btn ${isDisqualified ? 'disqualified' : ''}`}
+                      disabled={isDisqualified}
+                      onClick={() => handleConfirmSub(p.id)}
+                      title={isDisqualified ? t('player_disqualified_tooltip') : undefined}
+                    >
+                      <span>#{p.number}</span>
+                      <span className="flow-sub-item-name">
+                        {p.name} {isDisqualified && `(${t('player_disqualified_suffix')})`}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             )}
 
@@ -384,7 +509,7 @@ export const GameScreen = ({ navigation }: any) => {
           </div>
         ) : (
           <div className="sidebar-player-target placeholder">
-            <span>{t('game_modal_sub_empty') ? (language === 'VN' ? 'Chọn cầu thủ để ghi nhận' : 'Select a player to log') : ''}</span>
+            <span>{t('sidebar_select_player_placeholder')}</span>
           </div>
         )}
 
@@ -428,7 +553,7 @@ export const GameScreen = ({ navigation }: any) => {
       <div className="game-score-board">
         <button className="game-back-btn" onClick={() => navigation.goBack()}>
           <ChevronLeft size={18} />
-          <span>{language === 'VN' ? 'Quay lại' : 'Back'}</span>
+          <span>{t('common_back')}</span>
         </button>
         <div className="game-team-score team-a">
           <span className="game-score-name" title={teamA.name}>{teamA.name}</span>
@@ -442,7 +567,7 @@ export const GameScreen = ({ navigation }: any) => {
             className="game-undo-btn" 
             onClick={undoLastEvent} 
             disabled={events.length === 0}
-            title={language === 'VN' ? 'Hoàn tác thao tác vừa nhập' : 'Undo last action'}
+            title={t('game_undo_tooltip')}
           >
             <Undo2 size={14} />
             <span>{t('game_undo_btn')}</span>

@@ -65,4 +65,7 @@ export interface PlayerStats {
   plusMinus: number;
   efficiency: number;
   played: boolean;
+
+  // Foul breakdown
+  specialFoulsCount?: number;
 }

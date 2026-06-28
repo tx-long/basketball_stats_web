@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { Check, ChevronLeft } from 'lucide-react';
 
 export const LineupScreen = ({ navigation }: any) => {
-  const { teamA, teamB, startersA, startersB, setActiveLineup, language, t } = useGame();
+  const { teamA, teamB, startersA, startersB, setActiveLineup, t } = useGame();
   
   const [selectedA, setSelectedA] = useState<string[]>(() => startersA || []);
   const [selectedB, setSelectedB] = useState<string[]>(() => startersB || []);
@@ -87,7 +87,7 @@ export const LineupScreen = ({ navigation }: any) => {
       <div className="lineup-footer">
         <button className="lineup-back-btn" onClick={() => navigation.goBack()}>
           <ChevronLeft size={20} />
-          <span>{language === 'VN' ? 'Quay lại' : 'Back'}</span>
+          <span>{t('common_back')}</span>
         </button>
         <button className="lineup-start-btn" onClick={handleStart}>
           {t('lineup_start_btn')}

@@ -79,5 +79,19 @@
   "log_success_title": "Xuất game log thành công!",
   "log_success_msg": "File log game đã được lưu thành công.",
   "log_error": "Không thể xuất file game log.",
-  "game_undo_btn": "Hoàn tác"
+  "game_undo_btn": "Hoàn tác",
+  "action_assist_details": "Kiến tạo cho {name} (#{number})",
+  "action_shot_assisted_details": "Thành công (Kiến tạo bởi {name} #{number})",
+  "action_substitution_details": "Thay ra cho {name} (#{number})",
+  "sidebar_select_player_placeholder": "Chọn cầu thủ để ghi nhận",
+  "player_disqualified_tooltip": "Cầu thủ đã bị truất quyền thi đấu",
+  "player_disqualified_suffix": "Bị loại",
+  "common_back": "Quay lại",
+  "common_confirm": "Xác nhận",
+  "common_cancel": "Hủy",
+  "common_deselect": "Bỏ chọn",
+  "setup_coach_placeholder": "HLV Trưởng",
+  "setup_assistant_coach_placeholder": "Trợ lý HLV",
+  "summary_player_name": "Tên VĐV",
+  "game_undo_tooltip": "Hoàn tác thao tác vừa nhập"
 }

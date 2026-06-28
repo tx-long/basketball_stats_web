@@ -236,6 +236,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       plusMinus: 0,
       efficiency: 0,
       played: false,
+      specialFoulsCount: 0,
     };
 
     // Determine if player has participated
@@ -306,6 +307,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           stats.turnovers += 1;
         } else if (e.actionId === 'foul' || e.actionId.startsWith('foul_')) {
           stats.fouls += 1;
+          if (e.actionId === 'foul_technical' || e.actionId === 'foul_unsportsmanlike') {
+            stats.specialFoulsCount! += 1;
+          }
         } else if (e.actionId === 'fouldrawn') {
           stats.foulsDrawn += 1;
         }

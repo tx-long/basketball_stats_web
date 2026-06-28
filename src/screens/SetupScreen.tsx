@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { Plus, Trash2, ChevronRight, ChevronLeft } from 'lucide-react';
 
 export const SetupScreen = ({ navigation }: any) => {
-  const { teamA: contextTeamA, teamB: contextTeamB, setupTeams, language, t } = useGame();
+  const { teamA: contextTeamA, teamB: contextTeamB, setupTeams, t } = useGame();
   
   const [teamA, setTeamA] = useState(() => {
     if (contextTeamA.players && contextTeamA.players.length > 0) {
@@ -132,14 +132,14 @@ export const SetupScreen = ({ navigation }: any) => {
           <input
             type="text"
             className="setup-input-coach"
-            placeholder={language === 'VN' ? 'HLV Trưởng' : 'Head Coach'}
+            placeholder={t('setup_coach_placeholder')}
             value={data.coach}
             onChange={(e) => setData({ ...data, coach: e.target.value })}
           />
           <input
             type="text"
             className="setup-input-coach"
-            placeholder={language === 'VN' ? 'Trợ lý HLV' : 'Assistant Coach'}
+            placeholder={t('setup_assistant_coach_placeholder')}
             value={data.assistantCoach}
             onChange={(e) => setData({ ...data, assistantCoach: e.target.value })}
           />
@@ -204,7 +204,7 @@ export const SetupScreen = ({ navigation }: any) => {
       <div className="setup-footer">
         <button className="setup-back-btn" onClick={() => navigation.goBack()}>
           <ChevronLeft size={20} />
-          <span>{language === 'VN' ? 'Quay lại' : 'Back'}</span>
+          <span>{t('common_back')}</span>
         </button>
         <button className="setup-next-btn" onClick={handleNext}>
           <span>{t('setup_next_btn')}</span>

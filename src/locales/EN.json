@@ -79,5 +79,19 @@
   "log_success_title": "Game Log Exported!",
   "log_success_msg": "The game log file has been successfully written.",
   "log_error": "Unable to export game log file.",
-  "game_undo_btn": "Undo"
+  "game_undo_btn": "Undo",
+  "action_assist_details": "Assist to {name} (#{number})",
+  "action_shot_assisted_details": "Made Shot (Assisted by {name} #{number})",
+  "action_substitution_details": "Subbed out for {name} (#{number})",
+  "sidebar_select_player_placeholder": "Select a player to log",
+  "player_disqualified_tooltip": "Player has been disqualified",
+  "player_disqualified_suffix": "DQ",
+  "common_back": "Back",
+  "common_confirm": "Confirm",
+  "common_cancel": "Cancel",
+  "common_deselect": "Deselect",
+  "setup_coach_placeholder": "Head Coach",
+  "setup_assistant_coach_placeholder": "Assistant Coach",
+  "summary_player_name": "Name",
+  "game_undo_tooltip": "Undo last action"
 }

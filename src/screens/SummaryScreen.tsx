@@ -32,7 +32,7 @@ export const SummaryScreen = ({ navigation }: any) => {
           <thead>
             <tr>
               <th className="summary-cell-num">#</th>
-              <th className="summary-cell-name">{language === 'VN' ? 'Tên VĐV' : 'Name'}</th>
+              <th className="summary-cell-name">{t('summary_player_name')}</th>
               <th className="summary-cell-stat">PTS</th>
               <th className="summary-cell-stat">REB</th>
               <th className="summary-cell-stat">AST</th>
@@ -67,7 +67,7 @@ export const SummaryScreen = ({ navigation }: any) => {
       <div className="summary-header">
         <button className="summary-back-btn" onClick={handleBack}>
           <ChevronLeft size={18} />
-          <span>{language === 'VN' ? 'Quay lại' : 'Back'}</span>
+          <span>{t('common_back')}</span>
         </button>
         <h2 className="summary-header-title">{t('summary_title')}</h2>
         <div className="summary-final-score">
