@@ -311,16 +311,33 @@ export const exportToPDF = (
     </div>
   `;
 
+  // Temporarily attach to body to satisfy browsers requiring DOM attachment, without special positions/overlays
+  document.body.appendChild(container);
+
   const options = {
-    margin: [10, 10, 10, 10],
+    margin: [10, 10, 10, 10] as [number, number, number, number],
     filename: `${customName}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2.5, useCORS: true, logging: false },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    image: { type: 'jpeg' as const, quality: 0.98 },
+    html2canvas: { 
+      scale: 2.5, // Reverted to the original sharp 2.5 scale since the blank page was due to styling, not canvas limits
+      useCORS: true, 
+      logging: false 
+    },
+    jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'landscape' as const }
   };
 
   // @ts-ignore
-  html2pdf().set(options).from(container).save();
+  html2pdf()
+    .set(options)
+    .from(container)
+    .save()
+    .then(() => {
+      document.body.removeChild(container);
+    })
+    .catch((err: any) => {
+      console.error('PDF export error:', err);
+      document.body.removeChild(container);
+    });
 };
 
 export const exportToText = (
